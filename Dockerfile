@@ -18,7 +18,7 @@ WORKDIR /go/src/github.com/vmware-tanzu/velero-plugin-example
 COPY . .
 RUN CGO_ENABLED=0 go build -o /go/bin/velero-plugin-example .
 
-FROM busybox:1.33.1 AS busybox
+FROM busybox:1.37.0-musl AS busybox
 
 FROM scratch
 COPY --from=build /go/bin/velero-plugin-example /plugins/
