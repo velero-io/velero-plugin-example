@@ -1,6 +1,6 @@
 # Velero Example Plugins
 
-![Build Status][1]
+![Continuous Integration](https://github.com/vmware-tanzu/velero-plugin-example/actions/workflows/continuous-integration.yml/badge.svg)
 
 This repository contains example plugins for Velero.
 
