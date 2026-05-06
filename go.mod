@@ -1,8 +1,6 @@
 module github.com/vmware-tanzu/velero-plugin-example
 
-go 1.23.0
-
-toolchain go1.23.8
+go 1.26.0
 
 require (
 	github.com/pkg/errors v0.9.1
