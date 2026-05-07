@@ -15,6 +15,8 @@
 FROM golang:1.26-trixie AS build
 ENV GOPROXY=https://proxy.golang.org
 WORKDIR /go/src/github.com/vmware-tanzu/velero-plugin-example
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -o /go/bin/velero-plugin-example .
 
