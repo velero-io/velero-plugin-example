@@ -184,7 +184,7 @@ func (p *NoOpVolumeSnapshotter) SetVolumeID(unstructuredPV runtime.Unstructured,
 	}
 
 	if pv.Spec.HostPath == nil {
-		return nil, fmt.Errorf("spec.hostPath.path not found")
+		return nil, fmt.Errorf("spec.hostPath not found")
 	}
 
 	pv.Spec.HostPath.Path = volumeID
