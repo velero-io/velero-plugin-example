@@ -17,10 +17,10 @@ limitations under the License.
 package plugin
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	vsv1 "github.com/vmware-tanzu/velero/pkg/plugin/velero/volumesnapshotter/v1"
 	v1 "k8s.io/api/core/v1"
@@ -104,7 +104,7 @@ func (p *NoOpVolumeSnapshotter) GetVolumeInfo(volumeID, volumeAZ string) (string
 		iops := val.iops
 		return val.volType, &iops, nil
 	}
-	return "", nil, errors.New("Volume " + volumeID + " not found")
+	return "", nil, fmt.Errorf("Volume %s not found", volumeID)
 }
 
 // IsVolumeReady Check if the volume is ready.
@@ -160,7 +160,7 @@ func (p *NoOpVolumeSnapshotter) GetVolumeID(unstructuredPV runtime.Unstructured)
 
 	pv := new(v1.PersistentVolume)
 	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredPV.UnstructuredContent(), pv); err != nil {
-		return "", errors.WithStack(err)
+		return "", fmt.Errorf("converting PV from unstructured: %w", err)
 	}
 
 	if pv.Spec.HostPath == nil {
@@ -168,7 +168,7 @@ func (p *NoOpVolumeSnapshotter) GetVolumeID(unstructuredPV runtime.Unstructured)
 	}
 
 	if pv.Spec.HostPath.Path == "" {
-		return "", errors.New("spec.hostPath.path not found")
+		return "", fmt.Errorf("spec.hostPath.path not found")
 	}
 
 	return pv.Spec.HostPath.Path, nil
@@ -180,18 +180,18 @@ func (p *NoOpVolumeSnapshotter) SetVolumeID(unstructuredPV runtime.Unstructured,
 
 	pv := new(v1.PersistentVolume)
 	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstructuredPV.UnstructuredContent(), pv); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, fmt.Errorf("converting PV from unstructured: %w", err)
 	}
 
 	if pv.Spec.HostPath == nil {
-		return nil, errors.New("spec.hostPath.path not found")
+		return nil, fmt.Errorf("spec.hostPath not found")
 	}
 
 	pv.Spec.HostPath.Path = volumeID
 
 	res, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pv)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, fmt.Errorf("converting PV to unstructured: %w", err)
 	}
 
 	return &unstructured.Unstructured{Object: res}, nil

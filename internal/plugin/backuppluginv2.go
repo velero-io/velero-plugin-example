@@ -18,6 +18,7 @@ package plugin
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -31,7 +32,6 @@ import (
         "k8s.io/client-go/tools/clientcmd"
         "k8s.io/client-go/kubernetes"
 
-	"github.com/pkg/errors"
 	v1 "github.com/vmware-tanzu/velero/pkg/apis/velero/v1"
 	"github.com/vmware-tanzu/velero/pkg/kuberesource"
 	"github.com/vmware-tanzu/velero/pkg/plugin/velero"
@@ -88,12 +88,12 @@ func GetClient() (*kubernetes.Clientset, error) {
         kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
         clientConfig, err := kubeConfig.ClientConfig()
         if err != nil {
-                return nil, errors.WithStack(err)
+                return nil, fmt.Errorf("getting client config: %w", err)
         }
 
         client, err := kubernetes.NewForConfig(clientConfig)
         if err != nil {
-                return nil, errors.WithStack(err)
+                return nil, fmt.Errorf("creating kubernetes client: %w", err)
         }
 
         return client, nil
@@ -164,10 +164,10 @@ func (p *BackupPluginV2) Execute(item runtime.Unstructured, backup *v1.Backup) (
 		}
 		secretClient, err := GetClient()
 		if err != nil {
-			return item, nil, "", nil, errors.Wrap(err, "error getting secret client")
+			return item, nil, "", nil, fmt.Errorf("error getting secret client: %w", err)
 		}
 		if secret, err = secretClient.CoreV1().Secrets(metadata.GetNamespace()).Create(context.TODO(), secret, metav1.CreateOptions{}); err != nil {
-			return item, nil, "", nil, errors.Wrapf(err, "error creating %s secret", metadata.GetName())
+			return item, nil, "", nil, fmt.Errorf("error creating %s secret: %w", metadata.GetName(), err)
 		}
 	}
 
@@ -197,11 +197,11 @@ func (p *BackupPluginV2) Progress(operationID string, backup *v1.Backup) (velero
 	if len(splitOp) == 4 {
 		secretClient, err := GetClient()
 		if err != nil {
-			return progress, errors.Wrap(err, "error getting secret client")
+			return progress, fmt.Errorf("error getting secret client: %w", err)
 		}
 		secret, err := secretClient.CoreV1().Secrets(splitOp[2]).Get(context.TODO(), splitOp[3], metav1.GetOptions{})
 		if err != nil {
-			return progress, errors.Wrapf(err, "error getting %s secret", splitOp[3])
+			return progress, fmt.Errorf("error getting %s secret: %w", splitOp[3], err)
 		}
 		annotations := secret.Annotations
 		if annotations == nil {
@@ -218,7 +218,7 @@ func (p *BackupPluginV2) Progress(operationID string, backup *v1.Backup) (velero
 		annotations[AsyncBIAProgressAnnotation] = strconv.Itoa(priorProgressCalls+1)
 		secret.Annotations = annotations
 		if _, err := secretClient.CoreV1().Secrets(splitOp[2]).Update(context.TODO(), secret, metav1.UpdateOptions{}); err != nil {
-			return progress, errors.Wrapf(err, "error updating %s secret", splitOp[3])
+			return progress, fmt.Errorf("error updating %s secret: %w", splitOp[3], err)
 		}
 
 	} else if len(splitOp) != 2 {
