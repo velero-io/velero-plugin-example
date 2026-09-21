@@ -1,4 +1,4 @@
-module github.com/vmware-tanzu/velero-plugin-example
+module github.com/velero-io/velero-plugin-example
 
 go 1.26.0
 

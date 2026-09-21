@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PKG := github.com/vmware-tanzu/velero-plugin-example
+PKG := github.com/velero-io/velero-plugin-example
 BIN := velero-plugin-example
 
 REGISTRY ?= velero
